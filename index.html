@@ -219,9 +219,15 @@ let currentPage = 1;
 
 const $ = (id) => document.getElementById(id);
 
+// 로컬(localhost)에서는 data/papers.json, 배포 환경에서는 GitHub Releases의 최신 자산을 사용.
+// Release를 새로 만들면 자동으로 최신 파일이 로드됩니다.
+const DATA_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'data/papers.json'
+  : 'https://github.com/jinjin-stack/regional_paper/releases/latest/download/papers.json';
+
 async function loadData() {
   try {
-    const res = await fetch('data/papers.json');
+    const res = await fetch(DATA_URL);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     allPapers = await res.json();
     $('stat-total').textContent = allPapers.length.toLocaleString();
@@ -229,7 +235,7 @@ async function loadData() {
     $('stat-ko').textContent = allPapers.filter(p => p.language === 'ko').length.toLocaleString();
     applyFilters();
   } catch (err) {
-    $('list').innerHTML = `<div class="empty">데이터 로딩 실패: ${err.message}<br><small>로컬 서버를 통해 접속하셨는지 확인하세요. (py -m http.server)</small></div>`;
+    $('list').innerHTML = `<div class="empty">데이터 로딩 실패: ${err.message}<br><small>GitHub Releases에 papers.json이 업로드돼 있는지 확인하세요.<br>소스 URL: ${DATA_URL}</small></div>`;
   }
 }
 
