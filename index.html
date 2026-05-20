@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>지역혁신 · 균형발전 논문 큐레이션</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --muted: #78716c;
+    --accent: #1e40af;
+    --accent-soft: #dbeafe;
+    --tag-bg: #f5f5f4;
+    --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+                 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    font-size: 15px; line-height: 1.55;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+  header { margin-bottom: 24px; }
+  header h1 {
+    margin: 0 0 4px; font-size: 26px; font-weight: 700; letter-spacing: -0.02em;
+  }
+  header p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin: 20px 0;
+  }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px;
+  }
+  .stat .label { color: var(--muted); font-size: 12px; font-weight: 500; }
+  .stat .value { font-size: 22px; font-weight: 700; margin-top: 2px; }
+
+  .controls {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .controls .row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .controls .row:last-child { margin-bottom: 0; }
+  .controls input[type="text"] {
+    flex: 1; min-width: 240px;
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 15px; font-family: inherit; background: var(--bg);
+  }
+  .controls input[type="text"]:focus { outline: none; border-color: var(--accent); background: white; }
+  .controls select, .controls input[type="number"] {
+    padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 14px; font-family: inherit; background: var(--bg);
+  }
+  .controls label { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .controls input[type="number"] { width: 90px; }
+  .controls button {
+    padding: 8px 14px; border: 1px solid var(--border); background: white;
+    border-radius: 6px; cursor: pointer; font-size: 13px; font-family: inherit;
+  }
+  .controls button:hover { background: var(--tag-bg); }
+  .controls button.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .result-bar {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 12px; padding: 0 4px;
+    color: var(--muted); font-size: 13px;
+  }
+  .result-bar strong { color: var(--text); font-size: 15px; font-weight: 700; }
+
+  .paper {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px 18px; margin-bottom: 10px;
+    box-shadow: var(--shadow);
+  }
+  .paper .title-row {
+    display: flex; justify-content: space-between; gap: 16px; align-items: flex-start;
+  }
+  .paper .title {
+    font-size: 16px; font-weight: 600; margin: 0 0 6px;
+    color: var(--text); text-decoration: none;
+  }
+  .paper .title:hover { color: var(--accent); text-decoration: underline; }
+  .paper .citation {
+    flex-shrink: 0; background: var(--accent-soft); color: var(--accent);
+    padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .paper .meta {
+    color: var(--muted); font-size: 13px; margin: 4px 0;
+  }
+  .paper .meta .sep { margin: 0 6px; opacity: 0.6; }
+  .paper .meta .journal { font-style: italic; }
+  .paper .tags { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .paper .tag {
+    background: var(--tag-bg); color: var(--muted);
+    padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;
+  }
+  .paper .abstract {
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);
+    font-size: 14px; color: #44403c; line-height: 1.6;
+    max-height: 0; overflow: hidden; transition: max-height 0.2s ease;
+  }
+  .paper.expanded .abstract { max-height: 800px; padding-top: 10px; }
+  .paper .toggle {
+    margin-top: 8px; font-size: 12px; color: var(--accent); cursor: pointer;
+    user-select: none; display: inline-block;
+  }
+  .paper .toggle:hover { text-decoration: underline; }
+
+  .pagination {
+    display: flex; justify-content: center; gap: 6px; margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .pagination button {
+    padding: 6px 12px; border: 1px solid var(--border); background: white;
+    border-radius: 6px; cursor: pointer; font-size: 13px; font-family: inherit;
+    min-width: 36px;
+  }
+  .pagination button:hover:not(:disabled) { background: var(--tag-bg); }
+  .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pagination button.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .pagination .ellipsis { padding: 6px 4px; color: var(--muted); }
+
+  .loading, .empty {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+  .spinner {
+    width: 32px; height: 32px; border: 3px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 640px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .paper .title-row { flex-direction: column; }
+    .paper .citation { align-self: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>지역혁신 · 균형발전 논문 큐레이션</h1>
+    <p>OpenAlex 기반 · 과학기술정책 석사과정 연구용</p>
+  </header>
+
+  <div class="stats" id="stats">
+    <div class="stat"><div class="label">전체</div><div class="value" id="stat-total">-</div></div>
+    <div class="stat"><div class="label">필터 결과</div><div class="value" id="stat-filtered">-</div></div>
+    <div class="stat"><div class="label">영문</div><div class="value" id="stat-en">-</div></div>
+    <div class="stat"><div class="label">한글</div><div class="value" id="stat-ko">-</div></div>
+  </div>
+
+  <div class="controls">
+    <div class="row">
+      <input type="text" id="search" placeholder="제목·저자·초록 검색…" autocomplete="off" />
+      <select id="lang">
+        <option value="">언어: 전체</option>
+        <option value="ko">한글</option>
+        <option value="en">영문</option>
+        <option value="other">기타</option>
+      </select>
+      <select id="type">
+        <option value="">유형: 전체</option>
+        <option value="article">학술논문</option>
+        <option value="book-chapter">단행본 챕터</option>
+        <option value="book">단행본</option>
+        <option value="dissertation">학위논문</option>
+        <option value="review">리뷰</option>
+        <option value="preprint">프리프린트</option>
+        <option value="report">보고서</option>
+      </select>
+      <select id="sort">
+        <option value="citations">인용 ↓</option>
+        <option value="year_desc">최신순</option>
+        <option value="year_asc">오래된순</option>
+        <option value="title">제목순</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>연도 <input type="number" id="year-min" placeholder="2000" min="1980" max="2026" /> – <input type="number" id="year-max" placeholder="2026" min="1980" max="2026" /></label>
+      <label>인용 ≥ <input type="number" id="cite-min" placeholder="0" min="0" /></label>
+      <label><input type="checkbox" id="has-abstract" /> 초록 있는 항목만</label>
+      <button id="quick-ris">RIS</button>
+      <button id="quick-balanced">균형발전</button>
+      <button id="quick-smart">Smart Spec.</button>
+      <button id="reset">초기화</button>
+    </div>
+  </div>
+
+  <div class="result-bar">
+    <div><strong id="result-count">-</strong>편 표시</div>
+    <div id="page-info">-</div>
+  </div>
+
+  <div id="list">
+    <div class="loading"><div class="spinner"></div>데이터 로딩 중…</div>
+  </div>
+
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+const PAGE_SIZE = 25;
+let allPapers = [];
+let filtered = [];
+let currentPage = 1;
+
+const $ = (id) => document.getElementById(id);
+
+async function loadData() {
+  try {
+    const res = await fetch('data/papers.json');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    allPapers = await res.json();
+    $('stat-total').textContent = allPapers.length.toLocaleString();
+    $('stat-en').textContent = allPapers.filter(p => p.language === 'en').length.toLocaleString();
+    $('stat-ko').textContent = allPapers.filter(p => p.language === 'ko').length.toLocaleString();
+    applyFilters();
+  } catch (err) {
+    $('list').innerHTML = `<div class="empty">데이터 로딩 실패: ${err.message}<br><small>로컬 서버를 통해 접속하셨는지 확인하세요. (py -m http.server)</small></div>`;
+  }
+}
+
+function applyFilters() {
+  const q = $('search').value.trim().toLowerCase();
+  const lang = $('lang').value;
+  const type = $('type').value;
+  const yMin = parseInt($('year-min').value) || 0;
+  const yMax = parseInt($('year-max').value) || 9999;
+  const cMin = parseInt($('cite-min').value) || 0;
+  const sort = $('sort').value;
+  const onlyAbstract = $('has-abstract').checked;
+
+  filtered = allPapers.filter(p => {
+    if (lang) {
+      if (lang === 'other') { if (p.language === 'en' || p.language === 'ko') return false; }
+      else if (p.language !== lang) return false;
+    }
+    if (type && p.type !== type) return false;
+    const y = p.year || 0;
+    if (y < yMin || y > yMax) return false;
+    if ((p.citations || 0) < cMin) return false;
+    if (onlyAbstract && !p.abstract) return false;
+    if (q) {
+      const hay = (p.title + ' ' + (p.authors || []).join(' ') + ' ' + (p.abstract || '')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const cmp = {
+    'citations': (a,b) => (b.citations||0) - (a.citations||0) || (b.year||0) - (a.year||0),
+    'year_desc': (a,b) => (b.year||0) - (a.year||0) || (b.citations||0) - (a.citations||0),
+    'year_asc':  (a,b) => (a.year||0) - (b.year||0) || (b.citations||0) - (a.citations||0),
+    'title':     (a,b) => (a.title||'').localeCompare(b.title||'', 'ko'),
+  }[sort];
+  filtered.sort(cmp);
+
+  $('stat-filtered').textContent = filtered.length.toLocaleString();
+  $('result-count').textContent = filtered.length.toLocaleString();
+  currentPage = 1;
+  render();
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function render() {
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const page = filtered.slice(start, start + PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  $('page-info').textContent = `${currentPage} / ${totalPages} 페이지`;
+
+  if (page.length === 0) {
+    $('list').innerHTML = '<div class="empty">조건에 맞는 논문이 없습니다.</div>';
+    $('pagination').innerHTML = '';
+    return;
+  }
+
+  $('list').innerHTML = page.map((p, idx) => {
+    const authors = (p.authors || []).slice(0, 5).join(', ') + ((p.authors || []).length > 5 ? ' 외' : '');
+    const url = p.url || (p.doi ? `https://doi.org/${p.doi}` : '#');
+    const queries = (p.matched_queries || []).slice(0, 4).map(q => `<span class="tag">${escapeHtml(q)}</span>`).join('');
+    const lang = p.language ? `<span class="tag">${escapeHtml(p.language)}</span>` : '';
+    const typeTag = p.type ? `<span class="tag">${escapeHtml(p.type)}</span>` : '';
+    const abstract = p.abstract ? `<div class="abstract">${escapeHtml(p.abstract)}</div><span class="toggle" data-idx="${idx}">초록 보기 ▾</span>` : '';
+    return `
+      <div class="paper" id="paper-${idx}">
+        <div class="title-row">
+          <div style="flex:1; min-width:0">
+            <a class="title" href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(p.title)}</a>
+            <div class="meta">
+              ${escapeHtml(authors) || '(저자 미상)'}<span class="sep">·</span>${p.year || '연도?'}${p.journal ? `<span class="sep">·</span><span class="journal">${escapeHtml(p.journal)}</span>` : ''}
+            </div>
+            <div class="tags">${lang}${typeTag}${queries}</div>
+          </div>
+          <div class="citation">인용 ${(p.citations || 0).toLocaleString()}</div>
+        </div>
+        ${abstract}
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('.toggle').forEach(el => {
+    el.addEventListener('click', () => {
+      const card = el.closest('.paper');
+      card.classList.toggle('expanded');
+      el.textContent = card.classList.contains('expanded') ? '초록 접기 ▴' : '초록 보기 ▾';
+    });
+  });
+
+  renderPagination(totalPages);
+}
+
+function renderPagination(totalPages) {
+  const pg = $('pagination');
+  if (totalPages <= 1) { pg.innerHTML = ''; return; }
+  const parts = [];
+  const btn = (n, label, active=false, disabled=false) =>
+    `<button data-page="${n}" ${active?'class="active"':''} ${disabled?'disabled':''}>${label}</button>`;
+
+  parts.push(btn(currentPage - 1, '‹', false, currentPage === 1));
+
+  const pages = new Set([1, totalPages, currentPage, currentPage-1, currentPage+1, currentPage-2, currentPage+2]);
+  const sorted = [...pages].filter(p => p >= 1 && p <= totalPages).sort((a,b) => a-b);
+  let prev = 0;
+  for (const p of sorted) {
+    if (prev && p - prev > 1) parts.push('<span class="ellipsis">…</span>');
+    parts.push(btn(p, p, p === currentPage));
+    prev = p;
+  }
+
+  parts.push(btn(currentPage + 1, '›', false, currentPage === totalPages));
+  pg.innerHTML = parts.join('');
+  pg.querySelectorAll('button[data-page]').forEach(b => {
+    b.addEventListener('click', () => {
+      currentPage = parseInt(b.dataset.page);
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+}
+
+// debounce search
+let searchTimer;
+$('search').addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(applyFilters, 250);
+});
+['lang','type','sort','year-min','year-max','cite-min','has-abstract'].forEach(id => $(id).addEventListener('change', applyFilters));
+
+$('quick-ris').addEventListener('click', () => { $('search').value = 'regional innovation system'; applyFilters(); });
+$('quick-balanced').addEventListener('click', () => { $('search').value = '균형발전'; applyFilters(); });
+$('quick-smart').addEventListener('click', () => { $('search').value = 'smart special'; applyFilters(); });
+$('reset').addEventListener('click', () => {
+  ['search','year-min','year-max','cite-min'].forEach(id => $(id).value = '');
+  $('lang').value = ''; $('type').value = ''; $('sort').value = 'citations';
+  $('has-abstract').checked = false;
+  applyFilters();
+});
+
+loadData();
+</script>
+</body>
+</html>
